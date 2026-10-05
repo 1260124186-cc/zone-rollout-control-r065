@@ -139,52 +139,6 @@ func PolicyFromPlan(plan RolloutPlan) PlanPolicy {
 	}
 }
 
-// policyKey names the shared bucket a plan's thresholds are registered under.
-func policyKey(plan RolloutPlan) string {
-	return canonicalName(plan.Zone)
-}
-
-// RegisterPlanPolicy records a plan's thresholds so later reads and assessments
-// can resolve them without keeping them on the plan aggregate itself.
-func RegisterPlanPolicy(state *State, plan RolloutPlan) PlanPolicy {
-	policy := PolicyFromPlan(plan)
-	state.PlanPolicies[policyKey(plan)] = policy
-	return policy
-}
-
-// PlanPolicyFor resolves the thresholds used to assess a plan.
-func PlanPolicyFor(state *State, plan RolloutPlan) PlanPolicy {
-	if state == nil {
-		return PlanPolicy{}
-	}
-	if policy, ok := state.PlanPolicies[policyKey(plan)]; ok {
-		return policy
-	}
-	return PlanPolicy{}
-}
-
-// ApplyPlanPolicy projects the registered thresholds back onto a plan for
-// responses and reads.
-func ApplyPlanPolicy(state *State, plan RolloutPlan) RolloutPlan {
-	policy := PlanPolicyFor(state, plan)
-	plan.MinimumSuccessRatio = policy.MinimumSuccessRatio
-	plan.MaximumLatencyMS = policy.MaximumLatencyMS
-	return plan
-}
-
-// RebuildPlanPolicies reconstructs the threshold registry from the persisted
-// plans whenever a snapshot is loaded.
-func RebuildPlanPolicies(state *State) {
-	if state == nil {
-		return
-	}
-	policies := make(map[string]PlanPolicy, len(state.Plans))
-	for _, plan := range state.Plans {
-		policies[policyKey(plan)] = PolicyFromPlan(plan)
-	}
-	state.PlanPolicies = policies
-}
-
 func round(value float64, places int) float64 {
 	scale := math.Pow10(places)
 	return math.Round(value*scale) / scale

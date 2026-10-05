@@ -72,7 +72,7 @@ func (s *Service) Evaluate(
 				"plan_id": planID,
 			})
 		}
-		policy := domain.PlanPolicyFor(state, plan)
+		policy := domain.PolicyFromPlan(plan)
 		result = domain.BuildAssessment(s.ids.New("asm"), plan, policy, revision, probes, now)
 		result.RequestKey = input.RequestKey
 		state.Assessments[result.ID] = result
