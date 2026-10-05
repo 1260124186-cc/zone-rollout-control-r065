@@ -157,7 +157,6 @@ type State struct {
 	LeaseGroups           map[string]LeaseGroup        `json:"lease_groups"`
 	Probes                map[string]Probe             `json:"probes"`
 	Assessments           map[string]RolloutAssessment `json:"assessments"`
-	PlanPolicies          map[string]PlanPolicy        `json:"plan_policies"`
 	LeaseRequestKeys      map[string]string            `json:"lease_request_keys"`
 	AssessmentRequestKeys map[string]string            `json:"assessment_request_keys"`
 	AuditEvents           []AuditEvent                 `json:"audit_events"`

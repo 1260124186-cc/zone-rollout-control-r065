@@ -31,7 +31,6 @@ func Open(path string) (*Store, error) {
 			return nil, fmt.Errorf("decode snapshot: %w", err)
 		}
 		state = normalize(state)
-		domain.RebuildPlanPolicies(&state)
 	case errors.Is(err, os.ErrNotExist):
 		if err := replaceFile(path, state); err != nil {
 			return nil, fmt.Errorf("initialize snapshot: %w", err)

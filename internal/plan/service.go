@@ -38,12 +38,7 @@ func (s *Service) Create(ctx context.Context, input domain.PlanCreateInput) (dom
 		CreatedAt:           now,
 	}
 	err := s.store.Write(ctx, func(state *domain.State) error {
-		domain.RegisterPlanPolicy(state, plan)
-		stored := plan
-		stored.MinimumSuccessRatio = 0
-		stored.MaximumLatencyMS = 0
-		state.Plans[stored.ID] = stored
-		plan = domain.ApplyPlanPolicy(state, stored)
+		state.Plans[plan.ID] = plan
 		store.AddAudit(state, s.ids, "plan", plan.ID, "created", now, map[string]any{
 			"zone": plan.Zone,
 		})
@@ -138,7 +133,7 @@ func (s *Service) Activate(
 		store.AddAudit(state, s.ids, "plan", planID, "activated", now, map[string]any{
 			"version": current.Version,
 		})
-		plan = domain.ApplyPlanPolicy(state, current)
+		plan = current
 		return nil
 	})
 	return plan, err
@@ -166,7 +161,7 @@ func (s *Service) Complete(
 		store.AddAudit(state, s.ids, "plan", planID, "completed", now, map[string]any{
 			"version": current.Version,
 		})
-		plan = domain.ApplyPlanPolicy(state, current)
+		plan = current
 		return nil
 	})
 	return plan, err
@@ -179,7 +174,7 @@ func (s *Service) Get(ctx context.Context, planID string) (domain.RolloutPlan, e
 		if !ok {
 			return domain.NotFound("plan", planID)
 		}
-		plan = domain.ApplyPlanPolicy(state, found)
+		plan = found
 		return nil
 	})
 	return plan, err
@@ -235,7 +230,7 @@ func (s *Service) List(
 			if after != "" && plan.ID <= after {
 				continue
 			}
-			items = append(items, domain.ApplyPlanPolicy(state, plan))
+			items = append(items, plan)
 		}
 		sort.Slice(items, func(i, j int) bool {
 			return items[i].ID < items[j].ID
